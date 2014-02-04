@@ -1,0 +1,26 @@
+Historical (CMIP5)   black thick          cmip5_historical.data
+Historical (CMIP5)   filled band          cmip5_historical.data std_low
+Historical (CMIP5)   filled band          cmip5_historical.data std_hi
+
+Historical (CMIP3)   black dotted         cmip3_historical.data
+
+NOAA Obs             black thin           obs.data
+
+SRES A2              dotted red           a2.data
+SRES A1B             dotted yellow        a1b.data
+SRES B1              dotted blue          b1.data
+
+RCP 8.5              solid red            s1_CMIP5_rcp85.data
+RCP 8.5              filled red           s1_CMIP5_rcp85.data std_lo
+RCP 8.5              filled red           s1_CMIP5_rcp85.data std_hi
+
+
+RCP 6.0              solid yellow         rcp60.data
+
+RCP 4.5              solid blue           rcp45.data
+
+RCP 2.6              solid cyan           s0_CMIP5_rcp26.data
+RCP 2.6              filled cyan          s0_CMIP5_rcp26.data std_lo
+RCP 2.6              filled cyan          s0_CMIP5_rcp26.data std_hi
+
+
