@@ -1,0 +1,24 @@
+{
+  "name": "d3_timeseries_scenario_display",
+  "version": "0.0.0",
+  "description": "",
+  "main": "d3_timeseries_scenario_display.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/embeepea-scratch/d3_timeseries_scenario_display"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/embeepea-scratch/d3_timeseries_scenario_display/issues"
+  },
+  "homepage": "https://github.com/embeepea-scratch/d3_timeseries_scenario_display",
+  "dependencies": {
+    "underscore": "~1.5.2",
+    "jquery": "~1.x.x",
+    "d3": "~3.4.1"
+  }
+}
