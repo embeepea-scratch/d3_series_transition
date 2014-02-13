@@ -22,6 +22,12 @@ path.a2 {
     fill: none;
 }
 
+path.noaa_obs {
+    stroke: #000000;
+    stroke-width: 2;
+    fill: none;
+}
+
 path.cmip5_historical_line {
     stroke: #000000;
     stroke-width: 3;

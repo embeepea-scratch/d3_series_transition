@@ -41,6 +41,11 @@
                     "data" : data.cmip5_historical.value.data
                 },
                 {
+                    "type" : "line",
+                    "class" : "noaa_obs",
+                    "data" : data.noaa_obs.data
+                },
+                {
                     "type" : "area",
                     "class" : "proj_fill",
                     "states" : {
