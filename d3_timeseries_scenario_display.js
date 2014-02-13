@@ -2,6 +2,8 @@
 
     function construct(element, settings) {
 
+        var obj = {};
+
         //Create scale functions
         var xScale = d3.scale.linear()
 		    .domain([1900, 2100])
@@ -64,99 +66,76 @@
             })
             .y(function(d) { 
                 return yScale(d[1]);
-            })
+            });
         
         var area = d3.svg.area()
             .x(function(d) { return xScale(d[0]); })
             .y0(function(d) { return yScale(d[1]); })
             .y1(function(d) { return yScale(d[2]); });
         
-        
-        
-        
-        var csv = {};
-        var nOutstanding = 0;
-        
-        function incrOutstanding() {
-            ++nOutstanding;
-        }
-        function decrOutstanding() {
-            --nOutstanding;
-            if (nOutstanding <= 0) {
-                whenDataDone();
+        var transitions = [];
+
+        _.each(settings.series, function(series) {
+            var d;
+            switch (series.type) {
+                case "area":
+                    if (series.data !== undefined) {
+                        d = area(series.data);
+                        svg.append("svg:path").attr("class", series.class).attr("d", d);
+                    } else if (series.states !== undefined) {
+                        transitions.push( create_area_transition(series) );
+                    }
+                    break;
+                case "line":
+                    if (series.data !== undefined) {
+                        d = line(series.data);
+                        svg.append("svg:path").attr("class", series.class).attr("d", d);
+                    } else if (series.states !== undefined) {
+                        transitions.push( create_line_transition(series) );
+                    }
+                    break;
             }
+        });
+
+        function create_area_transition(series) {
+            var obj = {};
+            var current_state = series.states[series.default_state];
+            var target_state;
+            var path = svg.append("svg:path").attr("class", series.class).attr("d", area(current_state.data));
+            obj.states = series.states;
+            obj.set_target_state = function(state_name) {
+                target_state = series.states[state_name];
+            };
+            obj.set_transition_t = function(t) {
+                path.attr("d", area(interpoldateData(current_state.data, target_state.data, t)))
+                    .attr("style", "fill: " + interpolateColor(current_state.fill, target_state.fill, t));
+            };
+            obj.set_transition_done = function() {
+                current_state = target_state;
+            };
+            return obj;
+        }
+
+        function create_line_transition(series) {
+            var obj = {};
+            var current_state = series.states[series.default_state];
+            var target_state;
+            var path = svg.append("svg:path").attr("class", series.class).attr("d", line(current_state.data));
+            obj.states = series.states;
+            obj.set_target_state = function(state_name) {
+                target_state = series.states[state_name];
+            };
+            obj.set_transition_t = function(t) {
+                path.attr("d", line(interpoldateData(current_state.data, target_state.data, t)))
+                    .attr("style", "stroke: " + interpolateColor(current_state.stroke, target_state.stroke, t));
+            };
+            obj.set_transition_done = function() {
+                current_state = target_state;
+            };
+            return obj;
         }
         
-        function csvLoaded(name, data) {
-            csv[name] = data;
-            decrOutstanding();
-        }
-        
-        function doCsv(file, name, mapFunc) {
-            incrOutstanding();
-            d3.csv(file, function(stringData) {
-                csvLoaded(name, _.map(stringData, mapFunc));
-            });
-        }
-        
-        
-        incrOutstanding();
-        
-        doCsv("data/a1b.csv", "a1b", function(d) {
-            return [parseInt(d.year,10), parseFloat(d.value)];
-        });
-        doCsv("data/a2.csv", "a2", function(d) {
-            return [parseInt(d.year,10), parseFloat(d.value)];
-        });
-        doCsv("data/cmip5_historical.csv", "cmip5_historical", function(d) {
-            return [parseInt(d.year,10),parseFloat(d.high),parseFloat(d.low),parseFloat(d.value)];
-        });
-        doCsv("data/s0_CMIP5_rcp26.csv", "rcp26", function(d) {
-            return [parseInt(d.year,10),parseFloat(d.high),parseFloat(d.low),parseFloat(d.value)];
-        });
-        doCsv("data/s1_CMIP5_rcp85.csv", "rcp85", function(d) {
-            return [parseInt(d.year,10),parseFloat(d.high),parseFloat(d.low),parseFloat(d.value)];
-        });
-        
-        
-        
-        decrOutstanding();
-        
-        
-        var ready_d = {};
-        var current_proj, current_proj_line, current_proj_fill, current_proj_line_color, current_proj_fill_color;
-        
-        var rcp26_fill_color  = "#00AAAA";
-        var rcp26_line_color  = "#00FFFF";
-        var rcp85_fill_color  = "#AA0000";
-        var rcp85_line_color  = "#FF0000";
-        
-        
-        function whenDataDone() {
-            
-            svg.append("svg:path").attr("class", "cmip5_historical_fill")
-                .attr("d", area(_.map(csv.cmip5_historical, function(r) { return [r[0],r[1],r[2]]; })));
-            svg.append("svg:path").attr("class", "cmip5_historical_line")
-                .attr("d", line(_.map(csv.cmip5_historical, function(r) { return [r[0],r[3]]; })));
-            
-            ready_d.rcp26_fill = _.map(csv.rcp26, function(r) { return [r[0],r[1],r[2]]; }) ;
-            ready_d.rcp26_line = _.map(csv.rcp26, function(r) { return [r[0],r[3]]; })
-            ready_d.rcp85_fill = _.map(csv.rcp85, function(r) { return [r[0],r[1],r[2]]; }) ;
-            ready_d.rcp85_line = _.map(csv.rcp85, function(r) { return [r[0],r[3]]; })
-            
-            current_proj_line = ready_d.rcp26_line;
-            current_proj_fill = ready_d.rcp26_fill;
-            current_proj_line_color = rcp26_line_color;
-            current_proj_fill_color = rcp26_fill_color;
-            current_proj = "rcp26";
-            
-            svg.append("svg:path").attr("class", "proj_fill")
-                .attr("d", area(ready_d.rcp26_fill));
-            svg.append("svg:path").attr("class", "proj_line")
-                .attr("d", line(ready_d.rcp26_line));
-        }
-        
-        function interp_data(d1,d2,f) {
+        function interpoldateData(d1,d2,f) {
             return _.map(d1, function(r,i) {
                 return _.map(d1[i], function(e,j) {
                     if (j===0) {
@@ -168,13 +147,17 @@
             });
         }
         
-        function transition(N,delay,callback,t) {
+        function transition(N,delay,callback,done,t) {
             if (t===undefined) { t = 0.0; }
             callback(t);
             if (t<1.0) {
                 setTimeout(function() {
-                    transition(N, delay, callback, t+1/N);
+                    transition(N, delay, callback, done, t+1/N);
                 }, delay);
+            } else {
+                if (done !== undefined) {
+                    done();
+                }
             }
         }
         
@@ -205,54 +188,41 @@
             }
             return color;
         }
-        
-        
-        function do_proj(next_proj) {
-            
-            if (next_proj !== current_proj) {
-                if (next_proj === "rcp85") {
-                    transition(20,30,function(t) {
-                        svg.select(".proj_fill")
-                            .attr("d", area(interp_data(ready_d.rcp26_fill,
-                                                        ready_d.rcp85_fill,
-                                                        t)))
-                            .attr("style", "fill: " + interpolateColor("#00AAAA", "#AA0000", t));
-                        
-                        svg.select(".proj_line")
-                            .attr("d", line(interp_data(ready_d.rcp26_line,
-                                                        ready_d.rcp85_line,
-                                                        t)))
-                            .attr("style", "stroke: " + interpolateColor("#00FFFF", "#FF0000", t));
-                    });
-                } else {
-                    transition(20,30,function(t) {
-                        svg.select(".proj_fill")
-                            .attr("d", area(interp_data(ready_d.rcp85_fill,
-                                                        ready_d.rcp26_fill,
-                                                        t)))
-                            .attr("style", "fill: " + interpolateColor("#AA0000", "#00AAAA", t));
-                        
-                        svg.select(".proj_line")
-                            .attr("d", line(interp_data(ready_d.rcp85_line,
-                                                        ready_d.rcp26_line,
-                                                        t)))
-                            .attr("style", "stroke: " + interpolateColor("#FF0000", "#00FFFF", t));
-                    });
-                }
-                current_proj = next_proj;
-            }
-            
-        }
-        
-    }    
 
 
+        obj.transition_to_state = function(state_name) {
+
+            _.each(transitions, function(at) {
+                at.set_target_state(state_name);
+            });
+            transition(20,30,function(t) {
+                _.each(transitions, function(at) {
+                    at.set_transition_t(t);
+                });
+            },
+            function() {
+                _.each(transitions, function(at) {
+                    at.set_transition_done();
+                });
+            });
+            
+        };
+
+        return obj;
+        
+    }
 
     var methods = {
         init : function (options) {
+            if (options === undefined) { options = {}; }
+            // inherit size from the targeted HTML element itself, if no size was explicitly set in the options
+            if (options.width === undefined) {
+                options.width = $(this).width();
+            }
+            if (options.height === undefined) {
+                options.height = $(this).height();
+            }
             var defaults = {
-                'width'   : 500,
-                'height'  : 500,
                 'padding' : 50,
                 'x_title' : 'x',
                 'y_title' : 'y'
@@ -260,16 +230,24 @@
             var settings = $.extend({}, defaults, options);
             return this.each(function () {
                 var $this = $(this);
+                // get or set this instance's data object
                 var data = $this.data('d3_timeseries_scenario_display');
                 if ( ! data ) {
-                    $this.data('d3_timeseries_scenario_display', {
+                    data = {
                         'settings' : settings
-                    });
+                    };
+                    $this.data('d3_timeseries_scenario_display', data);
                 }
-                construct(this, settings);
+                // store the constructor object in this instance's data
+                data.obj = construct(this, settings);
                 return this;
             });
+        },
+
+        transition_to_state : function(proj) {
+            $(this).data('d3_timeseries_scenario_display').obj.transition_to_state(proj);
         }
+
     };
 
     $.fn.d3_timeseries_scenario_display = function (method) {
