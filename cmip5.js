@@ -2,7 +2,7 @@
     $.ajax({
         type: 'GET',
         contentType: 'application/json',
-        url: './data/data.json',
+        url: './cmip5.json',
         success: function(data) {
             setup(data);
         },
