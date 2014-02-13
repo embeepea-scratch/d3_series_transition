@@ -17,12 +17,14 @@
         $('#plot_scenarios').d3_timeseries_scenario_display({
             "x_axis" : {
                 "title"  : "Year",
+                "title_class" : "x-label",
                 "domain" : [1900,2100],
                 "ticks" : 10,
                 "tickFormat" : "1d"
             },
             "y_axis" : {
                 "title"  : "Average Global Temperature Change (°F)",
+                "title_class" : "y-label",
                 "domain" : [-2.0,10.0],
                 "ticks" : 5,
                 "tickFormat" : "1d"

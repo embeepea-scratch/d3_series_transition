@@ -4,71 +4,72 @@
 
         var obj = {};
 
-        //Create scale functions
-        var xScale = d3.scale.linear()
-		        .domain(settings.x_axis.domain)
-		        .range([settings.padding, settings.width - settings.padding * 2]);
-        
-        var yScale = d3.scale.linear()
-		        .domain(settings.y_axis.domain)
-		        .range([settings.height - settings.padding, settings.padding]);
-        
-        //Define X axis
-        var xAxis = d3.svg.axis()
-		        .scale(xScale)
-		        .orient("bottom")
-		        .ticks(settings.x_axis.ticks)
-                .tickFormat(d3.format(settings.x_axis.tickFormat));
-        
-        //Define Y axis
-        var yAxis = d3.svg.axis()
-		        .scale(yScale)
-		        .orient("left")
-		        .ticks(settings.y_axis.ticks)
-                .tickFormat(d3.format(settings.y_axis.tickFormat));
-        
         //Create SVG element
         var svg = d3.select(element)
                 .append("svg")
 		        .attr("width", settings.width)
 		        .attr("height", settings.height);
         
+
+        //Create scales
+        var xScale = d3.scale.linear()
+		        .domain(settings.x_axis.domain)
+		        .range([settings.padding, settings.width - settings.padding * 2]);
+        var yScale = d3.scale.linear()
+		        .domain(settings.y_axis.domain)
+		        .range([settings.height - settings.padding, settings.padding]);
+        
+        var text;
+
+        // Set up X axis
+        var xAxis = d3.svg.axis()
+		        .scale(xScale)
+		        .orient("bottom")
+		        .ticks(settings.x_axis.ticks)
+                .tickFormat(d3.format(settings.x_axis.tickFormat));
         svg.append("g")
 	        .attr("class", "axis")
 	        .attr("transform", "translate(0," + (settings.height - settings.padding) + ")")
 	        .call(xAxis);
-        
-        svg.append("text")
-            .attr("class", "x label")
-            .attr("text-anchor", "end")
-            .attr("x", settings.width/2)
-            .attr("y", settings.height-5)
-            .text(settings.x_axis.title);
-        
-        svg.append("text")
-            .attr("class", "y label")
-            .attr("text-anchor", "middle")
-            .attr("y", 6)
-            .attr("x", -settings.height/2+30)
-            .attr("dy", ".75em")
-            .attr("transform", "rotate(-90)")
-            .text(settings.y_axis.title);
-        
-        
-        //Create Y axis
+        if (settings.x_axis.title !== undefined) {
+            text = svg.append("text")
+                .attr("text-anchor", "end")
+                .attr("x", settings.width/2)
+                .attr("y", settings.height-5)
+                .text(settings.x_axis.title);
+            if (settings.x_axis.title_class !== undefined) {
+                text.attr("class", settings.x_axis.title_class);
+            }
+        }
+
+        // Set up Y axis
+        var yAxis = d3.svg.axis()
+		        .scale(yScale)
+		        .orient("left")
+		        .ticks(settings.y_axis.ticks)
+                .tickFormat(d3.format(settings.y_axis.tickFormat));
         svg.append("g")
 	        .attr("class", "axis")
 	        .attr("transform", "translate(" + settings.padding + ",0)")
 	        .call(yAxis);
-
+        if (settings.y_axis.title !== undefined) {        
+            text = svg.append("text")
+                .attr("text-anchor", "middle")
+                .attr("y", 6)
+                .attr("x", -settings.height/2+30)
+                .attr("dy", ".75em")
+                .attr("transform", "rotate(-90)")
+                .text(settings.y_axis.title);
+            if (settings.y_axis.title_class !== undefined) {
+                text.attr("class", settings.y_axis.title_class);
+            }
+        }
+        
+        
         var d3_data_funcs = {
             "line" : d3.svg.line()
-                .x(function(d,i) { 
-                    return xScale(d[0]);
-                })
-                .y(function(d) { 
-                    return yScale(d[1]);
-                }),
+                .x(function(d) { return xScale(d[0]); })
+                .y(function(d) { return yScale(d[1]); }),
             "area" : d3.svg.area()
                 .x(function(d) { return xScale(d[0]); })
                 .y0(function(d) { return yScale(d[1]); })
@@ -78,10 +79,13 @@
         var transitions = [];
 
         _.each(settings.series, function(series) {
-            var d;
+            var path;
             if (series.data !== undefined) {
-                d = d3_data_funcs[series.type](series.data);
-                svg.append("svg:path").attr("class", series.class).attr("d", d);
+                path = svg.append("svg:path")
+                    .attr("d", d3_data_funcs[series.type](series.data));
+                if (series["class"] !== undefined) {
+                    path.attr("class", series["class"]);
+                }
             } else if (series.states !== undefined) {
                 transitions.push( create_transition(series) );
             }
@@ -91,7 +95,7 @@
             var obj = {};
             var current_state = series.states[series.default_state];
             var target_state;
-            var path = svg.append("svg:path").attr("class", series.class).attr("d", d3_data_funcs[series.type](current_state.data));
+            var path = svg.append("svg:path").attr("class", series["class"]).attr("d", d3_data_funcs[series.type](current_state.data));
             obj.states = series.states;
             obj.set_target_state = function(state_name) {
                 target_state = series.states[state_name];
