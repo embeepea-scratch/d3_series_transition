@@ -6,31 +6,32 @@
 
         //Create scale functions
         var xScale = d3.scale.linear()
-		    .domain([1900, 2100])
-		    .range([settings.padding, settings.width - settings.padding * 2]);
+		        .domain(settings.x_axis.domain)
+		        .range([settings.padding, settings.width - settings.padding * 2]);
         
         var yScale = d3.scale.linear()
-		    .domain([-2.0, 10.0])
-		    .range([settings.height - settings.padding, settings.padding]);
+		        .domain(settings.y_axis.domain)
+		        .range([settings.height - settings.padding, settings.padding]);
         
         //Define X axis
         var xAxis = d3.svg.axis()
-		    .scale(xScale)
-		    .orient("bottom")
-		    .ticks(5)
-            .tickFormat(d3.format("1d"));
+		        .scale(xScale)
+		        .orient("bottom")
+		        .ticks(settings.x_axis.ticks)
+                .tickFormat(d3.format(settings.x_axis.tickFormat));
         
         //Define Y axis
         var yAxis = d3.svg.axis()
-		    .scale(yScale)
-		    .orient("left")
-		    .ticks(5);
+		        .scale(yScale)
+		        .orient("left")
+		        .ticks(settings.y_axis.ticks)
+                .tickFormat(d3.format(settings.y_axis.tickFormat));
         
         //Create SVG element
         var svg = d3.select(element)
-            .append("svg")
-		    .attr("width", settings.width)
-		    .attr("height", settings.height);
+                .append("svg")
+		        .attr("width", settings.width)
+		        .attr("height", settings.height);
         
         svg.append("g")
 	        .attr("class", "axis")
@@ -42,7 +43,7 @@
             .attr("text-anchor", "end")
             .attr("x", settings.width/2)
             .attr("y", settings.height-5)
-            .text(settings.x_title);
+            .text(settings.x_axis.title);
         
         svg.append("text")
             .attr("class", "y label")
@@ -51,7 +52,7 @@
             .attr("x", -settings.height/2+30)
             .attr("dy", ".75em")
             .attr("transform", "rotate(-90)")
-            .text(settings.y_title);
+            .text(settings.y_axis.title);
         
         
         //Create Y axis
@@ -59,56 +60,50 @@
 	        .attr("class", "axis")
 	        .attr("transform", "translate(" + settings.padding + ",0)")
 	        .call(yAxis);
-        
-        var line = d3.svg.line()
-            .x(function(d,i) { 
-                return xScale(d[0]);
-            })
-            .y(function(d) { 
-                return yScale(d[1]);
-            });
-        
-        var area = d3.svg.area()
-            .x(function(d) { return xScale(d[0]); })
-            .y0(function(d) { return yScale(d[1]); })
-            .y1(function(d) { return yScale(d[2]); });
+
+        var d3_data_funcs = {
+            "line" : d3.svg.line()
+                .x(function(d,i) { 
+                    return xScale(d[0]);
+                })
+                .y(function(d) { 
+                    return yScale(d[1]);
+                }),
+            "area" : d3.svg.area()
+                .x(function(d) { return xScale(d[0]); })
+                .y0(function(d) { return yScale(d[1]); })
+                .y1(function(d) { return yScale(d[2]); })
+        }
         
         var transitions = [];
 
         _.each(settings.series, function(series) {
             var d;
-            switch (series.type) {
-                case "area":
-                    if (series.data !== undefined) {
-                        d = area(series.data);
-                        svg.append("svg:path").attr("class", series.class).attr("d", d);
-                    } else if (series.states !== undefined) {
-                        transitions.push( create_area_transition(series) );
-                    }
-                    break;
-                case "line":
-                    if (series.data !== undefined) {
-                        d = line(series.data);
-                        svg.append("svg:path").attr("class", series.class).attr("d", d);
-                    } else if (series.states !== undefined) {
-                        transitions.push( create_line_transition(series) );
-                    }
-                    break;
+            if (series.data !== undefined) {
+                d = d3_data_funcs[series.type](series.data);
+                svg.append("svg:path").attr("class", series.class).attr("d", d);
+            } else if (series.states !== undefined) {
+                transitions.push( create_transition(series) );
             }
         });
 
-        function create_area_transition(series) {
+        function create_transition(series) {
             var obj = {};
             var current_state = series.states[series.default_state];
             var target_state;
-            var path = svg.append("svg:path").attr("class", series.class).attr("d", area(current_state.data));
+            var path = svg.append("svg:path").attr("class", series.class).attr("d", d3_data_funcs[series.type](current_state.data));
             obj.states = series.states;
             obj.set_target_state = function(state_name) {
                 target_state = series.states[state_name];
             };
             obj.set_transition_t = function(t) {
-                path.attr("d", area(interpoldateData(current_state.data, target_state.data, t)))
-                    .attr("style", "fill: " + interpolateColor(current_state.fill, target_state.fill, t));
+                path.attr("d", d3_data_funcs[series.type](interpoldateData(current_state.data, target_state.data, t)))
+                if (current_state.stroke !== undefined && target_state.stroke !== undefined) {
+                    path.attr("style", "stroke: " + interpolateColor(current_state.stroke, target_state.stroke, t));
+                }
+                if (current_state.fill !== undefined && target_state.fill !== undefined) {
+                    path.attr("style", "fill: " + interpolateColor(current_state.fill, target_state.fill, t));
+                }
             };
             obj.set_transition_done = function() {
                 current_state = target_state;
@@ -116,25 +111,6 @@
             return obj;
         }
 
-        function create_line_transition(series) {
-            var obj = {};
-            var current_state = series.states[series.default_state];
-            var target_state;
-            var path = svg.append("svg:path").attr("class", series.class).attr("d", line(current_state.data));
-            obj.states = series.states;
-            obj.set_target_state = function(state_name) {
-                target_state = series.states[state_name];
-            };
-            obj.set_transition_t = function(t) {
-                path.attr("d", line(interpoldateData(current_state.data, target_state.data, t)))
-                    .attr("style", "stroke: " + interpolateColor(current_state.stroke, target_state.stroke, t));
-            };
-            obj.set_transition_done = function() {
-                current_state = target_state;
-            };
-            return obj;
-        }
-        
         function interpoldateData(d1,d2,f) {
             return _.map(d1, function(r,i) {
                 return _.map(d1[i], function(e,j) {
@@ -200,11 +176,11 @@
                     at.set_transition_t(t);
                 });
             },
-            function() {
-                _.each(transitions, function(at) {
-                    at.set_transition_done();
-                });
-            });
+                       function() {
+                           _.each(transitions, function(at) {
+                               at.set_transition_done();
+                           });
+                       });
             
         };
 
