@@ -6,27 +6,6 @@ path.cmip3_historical {
     fill: none;
 }
 
-path.a2_transparent {
-    stroke: #CC0000;
-    stroke-width: 3;
-    fill: none;
-    opacity: 0.1;
-}
-
-path.a1b_transparent {
-    stroke: #CCCC00;
-    stroke-width: 3;
-    fill: none;
-    opacity: 0.1;
-}
-
-path.b1_transparent {
-    stroke: #00CCCC;
-    stroke-width: 3;
-    fill: none;
-    opacity: 0.1;
-}
-
 path.a2 {
     stroke: #CC0000;
     stroke-width: 3;

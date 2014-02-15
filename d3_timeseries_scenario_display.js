@@ -74,7 +74,7 @@
                 .x(function(d) { return xScale(d[0]); })
                 .y0(function(d) { return yScale(d[1]); })
                 .y1(function(d) { return yScale(d[2]); })
-        }
+        };
         
         var transitions = [];
 
@@ -86,27 +86,53 @@
                 if (series["class"] !== undefined) {
                     path.attr("class", series["class"]);
                 }
+                if (series["style"] !== undefined) {
+                    path.attr("style", _.map(series["style"], function (value,key) { return key + ': ' + value + ';'; }).join(""));
+                }
             } else if (series.states !== undefined) {
                 transitions.push( create_transition(series) );
             }
         });
+
+        // convert a JS object to a CSS style string
+        function obj2css(obj) {
+            return _.map(obj, function (value,key) { return key + ': ' + value + ';' }).join("");
+        }
 
         function create_transition(series) {
             var obj = {};
             var current_state = series.states[series.default_state];
             var target_state;
             var path = svg.append("svg:path").attr("class", series["class"]).attr("d", d3_data_funcs[series.type](current_state.data));
+            if (current_state["style"] !== undefined) {
+                path.attr("style", obj2css(_.extend({}, series["style"], current_state["style"])));
+            }
+
             obj.states = series.states;
             obj.set_target_state = function(state_name) {
                 target_state = series.states[state_name];
             };
             obj.set_transition_t = function(t) {
-                path.attr("d", d3_data_funcs[series.type](interpoldateData(current_state.data, target_state.data, t)))
-                if (current_state.stroke !== undefined && target_state.stroke !== undefined) {
-                    path.attr("style", "stroke: " + interpolateColor(current_state.stroke, target_state.stroke, t));
-                }
-                if (current_state.fill !== undefined && target_state.fill !== undefined) {
-                    path.attr("style", "fill: " + interpolateColor(current_state.fill, target_state.fill, t));
+                path.attr("d", d3_data_funcs[series.type](interpoldateData(current_state.data, target_state.data, t)));
+                if ((target_state["style"] !== undefined) && (target_state["style"] !== undefined)) {
+                    var interpolated_style = _.object(_.map(target_state["style"],
+                                                            function (value,key) {
+                                                                if ((current_state["style"][key] === undefined)
+                                                                    || (target_state["style"][key] === undefined)) {
+                                                                    return [undefined,undefined];
+                                                                }
+                                                                if (style_interpolation_funcs[key] !== undefined) {
+                                                                    value = style_interpolation_funcs[key](current_state["style"][key],
+                                                                                                           target_state["style"][key],
+                                                                                                           t);
+                                                                } else {
+                                                                    var st = (t < 0.5 ? current_state : target_state);
+                                                                    value = st["style"][key] + ';';
+                                                                }
+                                                                return [key, value];
+                                                            }
+                                                           ));
+                    path.attr("style", obj2css(_.extend({}, series["style"], interpolated_style)));
                 }
             };
             obj.set_transition_done = function() {
@@ -167,6 +193,27 @@
                 color += val;
             }
             return color;
+        }
+
+        function interpolateColorOrNone(minColor, maxColor, f) {
+            if (minColor === "none" || maxColor === "none") {
+                return "none";
+            }
+            return interpolateColor(minColor, maxColor, f);
+        }
+
+        function interpolateNumber(a,b,f) {
+            if (typeof(a) === "string") { a = parseFloat(a); }
+            if (typeof(b) === "string") { b = parseFloat(b); }
+            return a * (1 - f) + b * f;
+        }
+
+
+        var style_interpolation_funcs = {
+            "stroke"       : interpolateColorOrNone,
+            "fill"         : interpolateColorOrNone,
+            "stroke-width" : interpolateNumber,
+            "opacity"      : interpolateNumber
         }
 
 

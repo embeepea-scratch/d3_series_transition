@@ -7,7 +7,7 @@
             setup(data);
         },
         error: function(jqXHR, textStatus, e) {
-            console.log('parse error in data.json');
+            console.log('parse error in cmip5.json');
             console.log(textStatus);
             console.log(e);
         }
@@ -16,66 +16,90 @@
     function setup(data) {
         $('#plot_scenarios').d3_timeseries_scenario_display({
             "x_axis" : {
-                "title"  : "Year",
+                "title"       : "Year",
                 "title_class" : "x-label",
-                "domain" : [1900,2100],
-                "ticks" : 10,
-                "tickFormat" : "1d"
+                "domain"      : [1900,2100],
+                "ticks"       : 10,
+                "tickFormat"  : "1d"
             },
             "y_axis" : {
-                "title"  : "Average Global Temperature Change (°F)",
+                "title"       : "Average Global Temperature Change (°F)",
                 "title_class" : "y-label",
-                "domain" : [-2.0,10.0],
-                "ticks" : 5,
-                "tickFormat" : "1d"
+                "domain"      : [-2.0,10.0],
+                "ticks"       : 5,
+                "tickFormat"  : "1d"
             },
             "series" : [
+
                 {
-                    "type" : "area",
+                    "type"  : "area",
                     "class" : "cmip5_historical_fill",
-                    "data" : data.cmip5_historical.range.data
+                    "data"  : data.cmip5_historical.range.data,
+                    "style" : {
+                        "stroke-width" : "1",
+                        "fill"         : "#AAAAAA",
+                    }
+
                 },
                 {
-                    "type" : "line",
+                    "type"  : "line",
                     "class" : "cmip5_historical_line",
-                    "data" : data.cmip5_historical.value.data
+                    "data"  : data.cmip5_historical.value.data,
+                    "style" : {
+                        "stroke"       : "#000000",
+                        "stroke-width" : "3",
+                        "fill"         : "none"
+                    }
+
                 },
                 {
-                    "type" : "line",
+                    "type"  : "line",
                     "class" : "noaa_obs",
-                    "data" : data.noaa_obs.data
+                    "data"  : data.noaa_obs.data
                 },
                 {
-                    "type" : "area",
-                    "class" : "proj_fill",
+                    "type"   : "area",
+                    "class"  : "proj_fill",
+                    "style" : {
+                        "stroke-width" : "1",
+                        "opacity"      : "0.5"
+                    },
                     "states" : {
                         "rcp26" : {
-                            "data" : data.rcp26_projections.range.data,
-                            "fill" : "#00AAAA",
-                            "stroke" : undefined
+                            "data"   : data.rcp26_projections.range.data,
+                            "style" : {
+                                "fill" : "#00AAAA"
+                            }
                         },
                         "rcp85" : {
-                            "data" : data.rcp85_projections.range.data,
-                            "fill" : "#AA0000",
-                            "stroke" : undefined
+                            "data"   : data.rcp85_projections.range.data,
+                            "style" : {
+                                "fill" : "#AA0000"
+                            }
                         }
                     },
                     "default_state" : "rcp26"
                 },
 
                 {
-                    "type" : "line",
-                    "class" : "proj_line",
+                    "type"   : "line",
+                    "class"  : "proj_line",
+                    "style" : {
+                        "stroke-width" : "3",
+                        "fill"         : "none"
+                    },
                     "states" : {
                         "rcp26" : {
-                            "data" : data.rcp26_projections.value.data,
-                            "fill" : undefined,
-                            "stroke" : "#00FFFF"
+                            "data"   : data.rcp26_projections.value.data,
+                            "style" : {
+                                "stroke"       : "#00FFFF"
+                            }
                         },
                         "rcp85" : {
-                            "data" : data.rcp85_projections.value.data,
-                            "fill" : undefined,
-                            "stroke" : "#FF0000"
+                            "data"   : data.rcp85_projections.value.data,
+                            "style" : {
+                                "stroke"       : "#FF0000"
+                            }
                         }
                     },
                     "default_state" : "rcp26"
