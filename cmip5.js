@@ -33,17 +33,15 @@
 
                 {
                     "type"  : "area",
-                    "class" : "cmip5_historical_fill",
                     "data"  : data.cmip5_historical.range.data,
                     "style" : {
                         "stroke-width" : "1",
-                        "fill"         : "#AAAAAA",
+                        "fill"         : "#AAAAAA"
                     }
 
                 },
                 {
                     "type"  : "line",
-                    "class" : "cmip5_historical_line",
                     "data"  : data.cmip5_historical.value.data,
                     "style" : {
                         "stroke"       : "#000000",
@@ -54,12 +52,68 @@
                 },
                 {
                     "type"  : "line",
-                    "class" : "noaa_obs",
+                    "style" : {
+                        "stroke"       : "#000000",
+                        "stroke-width" : "2",
+                        "fill"         : "none"
+                    },
                     "data"  : data.noaa_obs.data
                 },
+
+                {   "type"  : "group",
+                    "style" : {
+                        "opacity"      : 0.05
+                    },
+                    "series" : [
+                        {   "type"  : "group",
+                            "style" : {
+                                "stroke-width" : "1"
+                            },
+                            "series" : [
+
+                                {
+                                    "type"   : "area",
+                                    "style" : {
+                                        "fill"         : "#00AAAA"
+                                    },
+                                    "data"   : data.rcp26_projections.range.data,
+                                },
+                                {
+                                    "type"   : "area",
+                                    "style" : {
+                                        "fill"         : "#AA0000"
+                                    },
+                                    "data"   : data.rcp85_projections.range.data
+                                }
+                            ]
+                        },
+                        {   "type"  : "group",
+                            "style" : {
+                                "stroke-width" : "3",
+                                "fill"         : "none",
+                            },
+                            "series" : [
+                                {
+                                    "type"   : "line",
+                                    "style" : {
+                                        "stroke"       : "#00FFFF"
+                                    },
+                                    "data"   : data.rcp26_projections.value.data
+                                },
+                                {
+                                    "type"   : "line",
+                                    "style" : {
+                                        "stroke"       : "#FF0000"
+                                    },
+                                    "data"   : data.rcp85_projections.value.data
+                                }
+                            ]
+                        }
+                    ]
+                },
+
                 {
                     "type"   : "area",
-                    "class"  : "proj_fill",
                     "style" : {
                         "stroke-width" : "1",
                         "opacity"      : "0.5"
@@ -83,7 +137,6 @@
 
                 {
                     "type"   : "line",
-                    "class"  : "proj_line",
                     "style" : {
                         "stroke-width" : "3",
                         "fill"         : "none"

@@ -1,3 +1,8 @@
+#plot_scenarios {
+    width: 1000px;
+    height: 400px;
+}
+
 .axis path,
 .axis line {
 	fill: none;
@@ -8,15 +13,4 @@
 .axis text {
 	font-family: sans-serif;
 	font-size: 14px;
-}
-
-path.noaa_obs {
-    stroke: #000000;
-    stroke-width: 2;
-    fill: none;
-}
-
-#plot_scenarios {
-    width: 1000px;
-    height: 400px;
 }

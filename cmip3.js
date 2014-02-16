@@ -33,51 +33,65 @@
                 {
                     "type"  : "line",
                     "class" : "cmip3_historical",
+                    "style" : {
+                        "stroke"       : "#000000",
+                        "stroke-width" : "3",
+                        "fill"         : "none"
+                    },
                     "data"  : data.cmip3_historical.value.data
                 },
 
                 {
                     "type"  : "line",
                     "class" : "noaa_obs",
+                    "style" : {
+                        "stroke"       : "#000000",
+                        "stroke-width" : "2",
+                        "fill"         : "none"
+                    },
                     "data"  : data.noaa_obs.data
                 },
                 {
-                    "type"  : "line",
-                    "data"  : data.a2_projections.value.data,
-                    "class" : "a2_transparent",
+                    "type" : "group",
                     "style" : {
-                        "stroke"       : "#CC0000",
-                        "stroke-width" : "3",
-                        "fill"         : "none",
-                        "opacity"      : "0.1"
-                    }
-                },
-                {
-                    "type"  : "line",
-                    "data"  : data.a1b_projections.value.data,
-                    "class" : "a1b_transparent",
-                    "style" : {
-                        "stroke"       : "#CCCC00",
-                        "stroke-width" : "3",
-                        "fill"         : "none",
-                        "opacity"      : "0.1"
-                    }
-                },
-                {
-                    "type"  : "line",
-                    "data"  : data.b1_projections.value.data,
-                    "class" : "b1_transparent",
-                    "style" : {
-                        "stroke"       : "#00CCCC",
-                        "stroke-width" : "3",
-                        "fill"         : "none",
                         "opacity"      : "0.1",
-                    }
+                        "stroke-width" : "3",
+                        "fill"         : "none"
+                    },
+                    "series" : [
+                        {
+                            "type"  : "line",
+                            "data"  : data.a2_projections.value.data,
+                            "class" : "a2_transparent",
+                            "style" : {
+                                "stroke"       : "#CC0000"
+                            }
+                        },
+                        {
+                            "type"  : "line",
+                            "data"  : data.a1b_projections.value.data,
+                            "class" : "a1b_transparent",
+                            "style" : {
+                                "stroke"       : "#CCCC00"
+                            }
+                        },
+                        {
+                            "type"  : "line",
+                            "data"  : data.b1_projections.value.data,
+                            "class" : "b1_transparent",
+                            "style" : {
+                                "stroke"       : "#00CCCC"
+                            }
+                        }
+                    ]
                 },
 
                 {
                     "type"   : "line",
                     "class"  : "proj_line",
+                    "style" : {
+                        "fill"         : "none"
+                    },
                     "states" : {
                         "a2" : {
                             "data"   : data.a2_projections.value.data,

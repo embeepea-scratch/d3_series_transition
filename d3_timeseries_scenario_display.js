@@ -78,35 +78,43 @@
         
         var transitions = [];
 
-        _.each(settings.series, function(series) {
-            var path;
-            if (series.data !== undefined) {
-                path = svg.append("svg:path")
-                    .attr("d", d3_data_funcs[series.type](series.data));
-                if (series["class"] !== undefined) {
-                    path.attr("class", series["class"]);
+        function create_series(series, style) {
+            if (series.type === "group") {
+                _.each(series.series, function(s) {
+                    create_series(s, _.extend({}, style, series.style));
+                });
+            } else {
+                var path;
+                if (series.data !== undefined) {
+                    path = svg.append("svg:path")
+                        .attr("d", d3_data_funcs[series.type](series.data));
+                    if (series["class"] !== undefined) {
+                        path.attr("class", series["class"]);
+                    }
+                    if (series["style"] !== undefined) {
+                        path.attr("style", obj2css(_.extend({}, style, series["style"])));
+                    }
+                } else if (series.states !== undefined) {
+                    transitions.push( create_transition(series,style) );
                 }
-                if (series["style"] !== undefined) {
-                    path.attr("style", _.map(series["style"], function (value,key) { return key + ': ' + value + ';'; }).join(""));
-                }
-            } else if (series.states !== undefined) {
-                transitions.push( create_transition(series) );
             }
-        });
+        }
+
+        _.each(settings.series, create_series);
 
         // convert a JS object to a CSS style string
         function obj2css(obj) {
             return _.map(obj, function (value,key) { return key + ': ' + value + ';' }).join("");
         }
 
-        function create_transition(series) {
+        function create_transition(series, style) {
             var obj = {};
             var current_state = series.states[series.default_state];
             var target_state;
             var path = svg.append("svg:path").attr("class", series["class"]).attr("d", d3_data_funcs[series.type](current_state.data));
-            if (current_state["style"] !== undefined) {
-                path.attr("style", obj2css(_.extend({}, series["style"], current_state["style"])));
-            }
+//            if (current_state["style"] !== undefined) {
+                path.attr("style", obj2css(_.extend({}, style, series["style"], current_state["style"])));
+//            }
 
             obj.states = series.states;
             obj.set_target_state = function(state_name) {
@@ -114,26 +122,27 @@
             };
             obj.set_transition_t = function(t) {
                 path.attr("d", d3_data_funcs[series.type](interpoldateData(current_state.data, target_state.data, t)));
+                var interpolated_style = undefined;
                 if ((target_state["style"] !== undefined) && (target_state["style"] !== undefined)) {
-                    var interpolated_style = _.object(_.map(target_state["style"],
-                                                            function (value,key) {
-                                                                if ((current_state["style"][key] === undefined)
-                                                                    || (target_state["style"][key] === undefined)) {
-                                                                    return [undefined,undefined];
-                                                                }
-                                                                if (style_interpolation_funcs[key] !== undefined) {
-                                                                    value = style_interpolation_funcs[key](current_state["style"][key],
-                                                                                                           target_state["style"][key],
-                                                                                                           t);
-                                                                } else {
-                                                                    var st = (t < 0.5 ? current_state : target_state);
-                                                                    value = st["style"][key] + ';';
-                                                                }
-                                                                return [key, value];
+                    interpolated_style = _.object(_.map(target_state["style"],
+                                                        function (value,key) {
+                                                            if ((current_state["style"][key] === undefined)
+                                                                || (target_state["style"][key] === undefined)) {
+                                                                return [undefined,undefined];
                                                             }
-                                                           ));
-                    path.attr("style", obj2css(_.extend({}, series["style"], interpolated_style)));
+                                                            if (style_interpolation_funcs[key] !== undefined) {
+                                                                value = style_interpolation_funcs[key](current_state["style"][key],
+                                                                                                       target_state["style"][key],
+                                                                                                       t);
+                                                            } else {
+                                                                var st = (t < 0.5 ? current_state : target_state);
+                                                                value = st["style"][key] + ';';
+                                                            }
+                                                            return [key, value];
+                                                        }
+                                                       ));
                 }
+                path.attr("style", obj2css(_.extend({}, style, series["style"], interpolated_style)));
             };
             obj.set_transition_done = function() {
                 current_state = target_state;
@@ -214,11 +223,9 @@
             "fill"         : interpolateColorOrNone,
             "stroke-width" : interpolateNumber,
             "opacity"      : interpolateNumber
-        }
-
+        };
 
         obj.transition_to_state = function(state_name) {
-
             _.each(transitions, function(at) {
                 at.set_target_state(state_name);
             });
@@ -227,16 +234,14 @@
                     at.set_transition_t(t);
                 });
             },
-                       function() {
-                           _.each(transitions, function(at) {
-                               at.set_transition_done();
-                           });
-                       });
-            
+            function() {
+                _.each(transitions, function(at) {
+                    at.set_transition_done();
+                });
+            });
         };
 
         return obj;
-        
     }
 
     var methods = {
