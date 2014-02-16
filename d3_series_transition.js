@@ -263,12 +263,12 @@
             return this.each(function () {
                 var $this = $(this);
                 // get or set this instance's data object
-                var data = $this.data('d3_timeseries_scenario_display');
+                var data = $this.data('d3_series_transition');
                 if ( ! data ) {
                     data = {
                         'settings' : settings
                     };
-                    $this.data('d3_timeseries_scenario_display', data);
+                    $this.data('d3_series_transition', data);
                 }
                 // store the constructor object in this instance's data
                 data.obj = construct(this, settings);
@@ -277,18 +277,18 @@
         },
 
         transition_to_state : function(proj) {
-            $(this).data('d3_timeseries_scenario_display').obj.transition_to_state(proj);
+            $(this).data('d3_series_transition').obj.transition_to_state(proj);
         }
 
     };
 
-    $.fn.d3_timeseries_scenario_display = function (method) {
+    $.fn.d3_series_transition = function (method) {
         if ( methods[method] ) {
             return methods[ method ].apply( this, Array.prototype.slice.call( arguments, 1 ));
         } else if ( typeof method === 'object' || ! method ) {
             return methods.init.apply( this, arguments );
         } else {
-            $.error( 'Method ' +  method + ' does not exist on d3_timeseries_scenario_display');
+            $.error( 'Method ' +  method + ' does not exist on d3_series_transition');
             return null;
         }
     };

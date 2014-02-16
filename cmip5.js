@@ -14,7 +14,7 @@
     });
 
     function setup(data) {
-        $('#plot_scenarios').d3_timeseries_scenario_display({
+        $('#plot_scenarios').d3_series_transition({
             "x_axis" : {
                 "title"       : "Year",
                 "title_class" : "x-label",
@@ -163,10 +163,10 @@
 
 
         $('#proj_rcp85').click(function() {
-            $('#plot_scenarios').d3_timeseries_scenario_display('transition_to_state', 'rcp85');
+            $('#plot_scenarios').d3_series_transition('transition_to_state', 'rcp85');
         });
         $('#proj_rcp26').click(function() {
-            $('#plot_scenarios').d3_timeseries_scenario_display('transition_to_state', 'rcp26');
+            $('#plot_scenarios').d3_series_transition('transition_to_state', 'rcp26');
         });
 
     }

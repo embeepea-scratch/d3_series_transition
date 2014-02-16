@@ -14,7 +14,7 @@
     });
 
     function setup(data) {
-        $('#plot_scenarios').d3_timeseries_scenario_display({
+        $('#plot_scenarios').d3_series_transition({
             "x_axis" : {
                 "title"       : "Year",
                 "title_class" : "x-label",
@@ -120,13 +120,13 @@
 
 
         $('#proj_a2').click(function() {
-            $('#plot_scenarios').d3_timeseries_scenario_display('transition_to_state', 'a2');
+            $('#plot_scenarios').d3_series_transition('transition_to_state', 'a2');
         });
         $('#proj_a1b').click(function() {
-            $('#plot_scenarios').d3_timeseries_scenario_display('transition_to_state', 'a1b');
+            $('#plot_scenarios').d3_series_transition('transition_to_state', 'a1b');
         });
         $('#proj_b1').click(function() {
-            $('#plot_scenarios').d3_timeseries_scenario_display('transition_to_state', 'b1');
+            $('#plot_scenarios').d3_series_transition('transition_to_state', 'b1');
         });
 
     }
